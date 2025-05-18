@@ -25,11 +25,11 @@ $(FLOPPY_IMG): $(BOOTLOADER_BIN) $(KERNEL_BIN) | always
 	@echo "[*] 建立空白軟碟映像"
 	dd if=/dev/zero of=$@ bs=512 count=2880
 
-	@echo "[*] 寫入 bootloader 至映像開頭 (MBR)"
-	dd if=$(BOOTLOADER_BIN) of=$@ conv=notrunc
-
 	@echo "[*] 使用 mtools 將映像格式化為 FAT12"
 	mformat -i $@ -f 1440 ::
+
+	@echo "[*] 寫入 bootloader 至映像開頭 (MBR)"
+	dd if=$(BOOTLOADER_BIN) of=$@ conv=notrunc
 
 	@echo "[*] 複製 kernel.bin 至映像中"
 	mcopy -i $@ $(KERNEL_BIN) ::kernel.bin
