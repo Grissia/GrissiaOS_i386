@@ -13,7 +13,7 @@ KERNEL_BIN     = $(BUILD_DIR)/kernel.bin
 FLOPPY_IMG     = $(BUILD_DIR)/main_floppy.img
 
 # phony 目標（非實際檔案）
-.PHONY: all floppy_image kernel bootloader clean always run
+.PHONY: all floppy_image kernel bootloader clean always run debug
 
 # 預設目標：建立軟碟映像
 all: floppy_image
@@ -59,3 +59,6 @@ clean:
 # ========== Qemu 測試用 ==========
 run: floppy_image
 	qemu-system-i386 -fda $(FLOPPY_IMG)
+
+debug: floppy_image
+	qemu-system-i386 -fda $(FLOPPY_IMG) -S -s
