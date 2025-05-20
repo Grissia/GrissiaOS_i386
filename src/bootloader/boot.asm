@@ -15,7 +15,7 @@ bdb_sectors_per_cluster:    db 1
 bdb_reserved_sectors:       dw 1
 bdb_fat_count:              db 2
 bdb_dir_entries_count:      dw 0E0h
-bdb_total_sectors:          dw 2800                     ; 1.4MB
+bdb_total_sectors:          dw 2880                     ; 1.4MB
 bdb_media_descriptor_type:  db 0F0h                     ; 0F0h = 3.5" floppy
 bdb_sectors_per_fat:        dw 9                        ; 9 sectors per FAT
 bdb_sectors_per_track:      dw 18
@@ -26,7 +26,7 @@ bdb_large_sector_count:     dd 0
 ; extended boot record
 ebd_drive_number:           db 0                        ; 0x00 floppy, 0x80 hdd, useless
                             db 0                        ; reserved
-ebd_signature:              db 0x29
+ebd_signature:              db 29h
 ebd_volume_id:              db 12h, 34h, 56h, 78h       ; serial number, value doesn't matter
 ebd_volume_label:           db 'Grissia OS '            ; 11 bytes
 ebd_system_id:              db 'FAT12   '               ; 8 bytes
@@ -47,20 +47,22 @@ puts:
     ; save registers we will modify
     push si
     push ax
-
+    push bx
 
 .loop:
     lodsb                                   ; loads next character in al
     or al, al
     jz .done
 
-    mov ah, 0x0e                            ; BIOS interrupt calls INT 10h
+    mov ah, 0x0E                            ; BIOS interrupt calls INT 10h
     mov bh, 0
     int 0x10
 
     jmp .loop
 
 .done:
+    ; restore registers
+    pop bx
     pop ax
     pop si
     ret
@@ -88,6 +90,7 @@ main:
     mov si, msg_hello
     call puts
 
+    cli                                     ; disable interrupts, so that CPU can't get out halt stage
     hlt
 
 ;
@@ -188,11 +191,11 @@ disk_read:
 .done:
     popa
 
-    push di                                 ; restore registers modified
-    push dx
-    push cx
-    push bx
-    push ax
+    pop di                                 ; restore registers modified
+    pop dx
+    pop cx
+    pop bx
+    pop ax
     ret
 
 ;
